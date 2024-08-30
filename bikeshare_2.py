@@ -8,6 +8,7 @@ CITY_DATA = { 'chicago': 'chicago.csv',
 CITIES = ['chicago', 'new york city', 'washington']
 MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul']
 DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+FILTER_CHOICES = ['Month', 'Both', 'None', 'Day']
 
 def get_month():
     while True:
@@ -27,10 +28,10 @@ def get_day():
         try:
             day = input("\nWhich day's report would you like to see? Choose number 1 to 7 (e.g. 1 = Sun, 2 = Mon... 7 = Sat)")
             if int(day.strip()) > len(DAYS) or int(day.strip()) < 1:
-                print("Incorrect Input! Please choose the correct month's number\n")
+                print("Incorrect Input! Please choose the correct day's number\n")
                 continue
         except Exception as e:
-            print("Incorrect Input! Please choose the correct month's number\n")
+            print("Incorrect Input! Please choose the correct day's number\n")
             continue
         break
     return DAYS[int(day)-1]
@@ -48,14 +49,27 @@ def get_filters():
     # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
     
     while True:
-        city = input("\nWhich city report would you like to see? \n1. Chicago   2. New York City    3. Washington :\n Enter number: ")
-        if int(city.strip()) > len(CITIES) or int(city.strip()) < 1:
-            print("\nIncorrect Input! Please choose correct city number!\n")
+        try:
+            city = input("\nWhich city report would you like to see? \n1. Chicago   2. New York City    3. Washington :\n Enter number: ")
+            if int(city.strip()) > len(CITIES) or int(city.strip()) < 1:
+                print("\nIncorrect Input! Please choose correct city's number!\n")
+                continue
+        except Exception as e:
+            print("Incorrect Input! Please choose the correct city's number\n")
             continue
         break
     city = CITIES[int(city)-1]
-    
-    filter_choice = input("\n Would you like to filter report based on month, day, both or none? Type 'None' for no filter: \n").capitalize()
+
+    while True:
+        try:
+            filter_choice = input("\n Would you like to filter report based on month, day, both or none? Type 'None' for no filter: \n").capitalize()
+            if filter_choice not in FILTER_CHOICES:
+                print("Incorrect Input! Please choose the correct option\n")
+                continue
+        except Exception as e:
+            print("Incorrect Input! Please choose the correct option\n")
+            continue
+        break
 
     match filter_choice:
         case 'None':
@@ -185,15 +199,24 @@ def user_stats(df):
     start_time = time.time()
 
     # Display counts of user types
-    print(f"Total number of users based on types: \n{df['User Type'].value_counts()}")
+    print(f"Total number of users based on types: \n{df['User Type'].value_counts()}\n")
 
 
     # Display counts of gender
-
+    if "Gender" in df.columns:
+        print(f"Total number of users based on types: \n{df['Gender'].value_counts()}\n")
+    else:
+        print("There is no gender data")
 
 
 
     # Display earliest, most recent, and most common year of birth
+    if "Birth Year" in df.columns:
+        print(f"Earliest birth year: {df['Birth Year'].min()}\n")
+        print(f"Most recent birth year: {df['Birth Year'].max()}\n")
+        print(f"Most common birth year: {df['Birth Year'].mode()[0]}\n")
+    else:
+        print("There is no Birth year data")
 
 
 
@@ -209,7 +232,8 @@ def main():
 
         """
         - Filling Nan values in column Gender and Birth year as other columns doesn't have Nan values. 
-        - Also,Dropping those values will leave us with only one User Type
+        - Because dropping those values will leave us with only one User Type (but it will also lead to biased data when it comes to Gender and Bith year)
+        - We can always go with other types of data imputation here ()
         - As Washington.csv doesnt have columns Gender and Birth Year, we need to put the check
         """
 
