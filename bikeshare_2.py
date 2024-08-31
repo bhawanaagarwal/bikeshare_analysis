@@ -11,16 +11,17 @@ DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sun
 FILTER_CHOICES = ['month', 'day', 'both', 'none']
 
 def get_choice(options, prompt, error_msg = "Incorrect choice! Please try again!"):
-    '''
-    Input:
-    options - can be city, month, day or filter choice
-    prompt - user prompt to ask user to make choices
-    error_msg - if the chosen value is not present
+    """
+    Args:
+        options (list) - can be city, month, day or filter choice
+        prompt (str) - user prompt to ask user to make choices
+        error_msg (str) - if the chosen value is not present
 
 
-    Returns the choice of the user for the given option
+    Returns:
+      The choice of the user for the given option
 
-    '''
+    """
 
     while True:
         try:
@@ -210,6 +211,8 @@ def user_stats(df):
     print('-'*40)
 
 def show_data(df, no_rows):
+    """Displays 5 records from the dataset"""
+
     print(df.iloc[no_rows:no_rows+5, :])
 
 
@@ -220,7 +223,14 @@ def main():
 
     1. Gets the user's choice for city, month, and day
     2. loads the data based on user choices
-    3. 
+    3. Calculates the stats
+    4. Displays various statistics including:
+        - Most frequent times of travel.
+        - Most popular stations and trip combinations.
+        - Total and average trip duration.
+        - User statistics such as counts by user type, gender, and birth year
+
+    5. Prompts user to restart the program or exit it
     '''
     
     
