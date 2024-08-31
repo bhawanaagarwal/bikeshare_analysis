@@ -11,6 +11,7 @@ DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sun
 FILTER_CHOICES = ['month', 'day', 'both', 'none']
 
 def get_choice(options, prompt, error_msg = "Incorrect choice! Please try again!"):
+
     """
     Args:
         options (list) - can be city, month, day or filter choice
@@ -137,24 +138,14 @@ def station_stats(df):
     start_time = time.time()
 
     # display most commonly used start station
-    common_start_st = df['Start Station'].mode()[0]
-    print(f"Most common Start Station: {common_start_st}")
-    print(f"Count: {df['Start Station'].value_counts()[common_start_st]}\n")
-    
-
+    display_stats(df, 'Start Station', 'Start Station')
 
     # display most commonly used end station
-    common_end_station = df['End Station'].mode()[0]
-    print(f"Most common End Station: {common_end_station}")
-    print(f"Count: {df['End Station'].value_counts()[common_end_station]}\n")
-
+    display_stats(df, 'End Station', 'End Station')
 
     # display most frequent combination of start station and end station trip
-    combination = pd.concat([df['Start Station'], df['End Station']])
-    comb_mode = combination.mode()[0]
-    
-    print(f"Most common combination of Start and End Station: {comb_mode}")
-    print(f"Count: {combination.value_counts()[comb_mode]}\n")
+    df['comb start & end station'] = pd.concat([df['Start Station'], df['End Station']])
+    display_stats(df, 'comb start & end station', 'combination of Start and End Station')
 
 
     print("\nThis took %s seconds." % (time.time() - start_time))
