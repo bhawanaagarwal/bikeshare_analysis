@@ -8,33 +8,31 @@ CITY_DATA = { 'chicago': 'chicago.csv',
 CITIES = ['chicago', 'new york city', 'washington']
 MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul']
 DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-FILTER_CHOICES = ['Month', 'Both', 'None', 'Day']
+FILTER_CHOICES = ['month', 'day', 'both', 'none']
 
-def get_month():
+def get_choice(options, prompt, error_msg = "Incorrect choice! Please try again!"):
+    '''
+    Input:
+    options - can be city, month, day or filter choice
+    prompt - user prompt to ask user to make choices
+    error_msg - if the chosen value is not present
+
+
+    Returns the choice of the user for the given option
+
+    '''
+
     while True:
         try:
-            month = input("\nWhich month's report would you like to see? Choose number 1 to 6 (e.g. 1 = Jan, 2 = Feb... 6 = Jun)")
-            if int(month.strip()) > len(MONTHS) or int(month.strip()) < 1:
-                print("Incorrect Input! Please choose the correct month's number\n")
-                continue
-        except Exception as e:
-            print("Incorrect Input! Please choose the correct month's number\n")
-            continue
-        break
-    return MONTHS[int(month)-1]
+            choice = input(prompt).strip()
+            if choice.isdigit() and 1 <= int(choice) <= len(options):
+                return options[int(choice)-1]
+            if choice.lower() in options:
+                return choice.lower()
+            print(error_msg)
 
-def get_day():
-    while True:
-        try:
-            day = input("\nWhich day's report would you like to see? Choose number 1 to 7 (e.g. 1 = Sun, 2 = Mon... 7 = Sat)")
-            if int(day.strip()) > len(DAYS) or int(day.strip()) < 1:
-                print("Incorrect Input! Please choose the correct day's number\n")
-                continue
         except Exception as e:
-            print("Incorrect Input! Please choose the correct day's number\n")
-            continue
-        break
-    return DAYS[int(day)-1]
+            print(error_msg)
 
 def get_filters():
     """
@@ -48,38 +46,14 @@ def get_filters():
     print('Hello! Let\'s explore some US bikeshare data!')
     # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
     
-    while True:
-        try:
-            city = input("\nWhich city report would you like to see? \n1. Chicago   2. New York City    3. Washington :\n Enter number: ")
-            if int(city.strip()) > len(CITIES) or int(city.strip()) < 1:
-                print("\nIncorrect Input! Please choose correct city's number!\n")
-                continue
-        except Exception as e:
-            print("Incorrect Input! Please choose the correct city's number\n")
-            continue
-        break
-    city = CITIES[int(city)-1]
+    city = get_choice(CITIES, "\nWhich city report would you like to see?\n1. Chicago   2. New York City    3. Washington\nEnter number: ")
+    filter_choice = get_choice(FILTER_CHOICES, "\nWould you like to filter the report based on month, day, both, or none?\n")
 
-    while True:
-        try:
-            filter_choice = input("\n Would you like to filter report based on month, day, both or none? Type 'None' for no filter: \n").capitalize()
-            if filter_choice not in FILTER_CHOICES:
-                print("Incorrect Input! Please choose the correct option\n")
-                continue
-        except Exception as e:
-            print("Incorrect Input! Please choose the correct option\n")
-            continue
-        break
+    if filter_choice == 'none':
+        return city, 'all', 'all'
+    month = get_choice(MONTHS, "\nWhich month? Choose number 1 to 6 (e.g. 1 = Jan, 6 = Jun): ") if filter_choice in ['month', 'both'] else 'all'
+    day = get_choice(DAYS, "\nWhich day? Choose number 1 to 7 (e.g. 1 = Sun, 7 = Sat): ") if filter_choice in ['day', 'both'] else 'all'
 
-    match filter_choice:
-        case 'None':
-            return city, 'all', 'all'
-        case 'Both':
-            return city, get_month(), get_day()
-        case 'Month':
-            return city, get_month(), 'all'
-        case 'Day':
-            return city, 'all', get_day()
 
     # get user input for month (all, january, february, ... , june)
 
@@ -87,6 +61,7 @@ def get_filters():
     # get user input for day of week (all, monday, tuesday, ... sunday)
 
     print('-'*40)
+    return city, month, day
 
 
 def load_data(city, month, day):
@@ -116,6 +91,22 @@ def load_data(city, month, day):
 
     return df
 
+def display_stats(df, col_name, label_name):
+    "Displaying statistics for the given options"
+
+    '''
+    Inputs:
+    - df: dataframe
+    - col_name: column name for which the frequency needs to analysed
+    - label_name: label for the print message for each column
+    '''
+
+    frequent_val = df[col_name].mode()[0]
+    print(f"Most common {label_name}: {frequent_val}")
+    print(f"Count: {df[col_name].value_counts()[frequent_val]}\n")
+
+
+
 
 def time_stats(df):
     """Displays statistics on the most frequent times of travel."""
@@ -124,20 +115,15 @@ def time_stats(df):
     start_time = time.time()
 
     # display the most common month
-    common_month = df['month'].mode()[0]
-    print(f"Most common month of Travel: {common_month}")
-    print(f"Count: {df['month'].value_counts()[common_month]}\n")
+    display_stats(df, 'month', 'month of travel')
 
     # display the most common day of week
-    common_day = df['day_of_week'].mode()[0]
-    print(f"Most common day of Travel: {common_day}")
-    print(f"Count: {df['day_of_week'].value_counts()[common_day]}\n")
+    display_stats(df, 'day_of_week', 'day of travel')
 
     # display the most common start hour
-    hours = df['Start Time'].dt.hour
-    common_hour = hours.mode()[0]
-    print(f"Most common hour of Travel: {common_hour}")
-    print(f"Count: {hours.value_counts()[common_hour]}\n")
+    df['hour'] = df['Start Time'].dt.hour
+
+    display_stats(df, 'hour', 'hour of travel')
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -223,17 +209,30 @@ def user_stats(df):
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
+def show_data(df, no_rows):
+    print(df.iloc[no_rows:no_rows+5, :])
+
 
 def main():
+
+    '''
+    This is the main function that manages the complete analysis
+
+    1. Gets the user's choice for city, month, and day
+    2. loads the data based on user choices
+    3. 
+    '''
+    
+    
     while True:
         city, month, day = get_filters()
-        print(city, month, day)
-        df = load_data(city, month, day)
+        df = load_data(city, month, day)       
+            
 
         """
         - Filling Nan values in column Gender and Birth year as other columns doesn't have Nan values. 
         - Because dropping those values will leave us with only one User Type (but it will also lead to biased data when it comes to Gender and Bith year)
-        - We can always go with other types of data imputation here ()
+        - We can always go with other types of data imputation here
         - As Washington.csv doesnt have columns Gender and Birth Year, we need to put the check
         """
 
@@ -242,12 +241,21 @@ def main():
         if "Birth Year" in df.columns:
             df['Birth Year'] = df['Birth Year'].fillna(df['Birth Year'].median()).astype('int64')
 
-        print(df.head(10))
 
         time_stats(df)
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
+
+        no_of_rows = 0
+
+        while True:
+            data_req = input("Do you want to check the first 5 rows of the dataset? Choose yes or no\n")
+            if data_req.strip() != 'yes':
+                no_of_rows = 0
+                break
+            show_data(df, no_of_rows)
+            no_of_rows += 5
 
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
